@@ -6,3 +6,5 @@ Desktop.ini
 # Python
 *.py[cod]
 .idea/
+tmp/
+static/csv/
