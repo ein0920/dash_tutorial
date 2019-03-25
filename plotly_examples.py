@@ -121,7 +121,6 @@ if __name__ == '__main__':
     # mode参数：marker, lines+markers, lines
     # 附带visible,showlegend,legendgroup
     # opacity, name
-
     if __name__ == '__main__':
 
         N = 100
@@ -157,15 +156,14 @@ if __name__ == '__main__':
         data = [trace0, trace1, trace2]
         url = py.plot(data, filename='tmp/scatter_tutorial.html', auto_open=True, )
 
+
     # markers参数，
-    # 附带hoverinfo 'x'只显示x，name是显示系列名称，text是显示x轴坐标对应的名称
     if __name__ == '__main__':
         N = 500
 
         trace0 = go.Scatter(
             x=np.random.randn(N),
             y=np.random.randn(N) + 2,
-            # visible=False,
             name='Above',
             mode='markers',
             marker=dict(
@@ -176,8 +174,6 @@ if __name__ == '__main__':
                     color='rgb(0, 0, 0)'
                 )
             ),
-            hoverinfo='name',
-
         )
 
         trace1 = go.Scatter(
@@ -280,6 +276,31 @@ if __name__ == '__main__':
         )
         data = [trace]
         url = py.plot(data, filename='tmp/scatter_tutorial.html', auto_open=True, )
+
+
+    # hoverlabel
+    if __name__ == '__main__':
+        N = 100
+        random_x = np.linspace(0, 1, N)
+        random_y0 = np.random.randn(N)
+
+        # Create traces
+        trace0 = go.Scatter(
+            x=random_x,
+            y=random_y0,
+            mode='markers',
+            name='test hoverlabel',
+            showlegend=True,
+            hoverinfo='all',  # 附带hoverinfo 'x'只显示x，name是显示系列名称，text是显示x轴坐标对应的名称
+            hoverlabel=dict(
+                bgcolor='yellow',
+
+            )
+
+        )
+        data = [trace0]
+        url = py.plot(data, filename='tmp/scatter_tutorial.html', auto_open=True, )
+
 
     # 全部的参数解析 https://plot.ly/python/reference/#scattergl
 
