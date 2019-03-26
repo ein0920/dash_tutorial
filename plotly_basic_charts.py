@@ -5,11 +5,12 @@ https://plot.ly/python/
 全部的参数解析 https://plot.ly/python/reference/#scatter
 '''
 
-import plotly.offline as py
-import plotly.graph_objs as go
 
 # 1、一个综合的例子-bar
 if __name__ == '__main__1':
+    import plotly.offline as py
+    import plotly.graph_objs as go
+
     figure = go.Figure(
         # 两个数据放到同一个chart中
         data=[
@@ -493,7 +494,7 @@ if __name__ == '__main__':
         py.plot(fig, filename='tmp/line_tutorial.html', auto_play=True)
 
 
-    # Connect Data Gaps，x有空值
+    # Connect Data Gaps，x有空值connectgaps参数
     if __name__ == '__main__':
         trace1 = go.Scatter(
             x=[1, 2, 3, 4, 5,
@@ -598,7 +599,7 @@ if __name__ == '__main__':
         py.plot(fig, filename='tmp/line_tutorial.html', auto_play=True)
 
 
-    # Label Lines with Annotations
+    # Label Lines with Annotations:annotations是在layout里面的
     if __name__ == '__main__':
         title = 'Main Source for News'
 
@@ -680,7 +681,7 @@ if __name__ == '__main__':
         # Adding labels
         for y_trace, label, color in zip(y_data, labels, colors):
             # labeling the left_side of the plot
-            annotations.append(dict(xref='paper', x=0.05, y=y_trace[0],
+            annotations.append(dict(xref='paper', x=0.05, y=y_trace[0],  # paper是相对于画图区域的比例，y就是在chart中坐标的位置了
                                     xanchor='right', yanchor='middle',
                                     text=label + ' {}%'.format(y_trace[0]),
                                     font=dict(family='Arial',
@@ -796,9 +797,9 @@ if __name__ == '__main__':
             plot_bgcolor='rgb(229,229,229)',
             xaxis=dict(
                 gridcolor='rgb(255,255,255)',
-                range=[1, 10],
+                range=[1, 10],  # 显示范围了
                 showgrid=True,
-                showline=False,
+                showline=False,  # 边线
                 showticklabels=True,
                 tickcolor='rgb(127,127,127)',
                 ticks='outside',
@@ -825,7 +826,7 @@ if __name__ == '__main__':
 
     import numpy as np
 
-    # Grouped Bar Chart
+    # Grouped Bar Chart，layout的barmode='group'
     if __name__ == '__main__':
         trace1 = go.Bar(
             x=['giraffes', 'orangutans', 'monkeys'],
@@ -847,7 +848,7 @@ if __name__ == '__main__':
         py.plot(fig, filename='tmp/line_tutorial.html', auto_play=True)
 
 
-    # Stacked Bar Chart
+    # Stacked Bar Chart，layout的barmode='stack'
     if __name__ == '__main__':
         trace1 = go.Bar(
             x=['giraffes', 'orangutans', 'monkeys'],
@@ -894,7 +895,7 @@ if __name__ == '__main__':
         py.plot(fig, filename='tmp/line_tutorial.html', auto_play=True)
 
 
-    # Bar Chart with Direct Labels
+    # Bar Chart with Direct Labels，textposition='auto'
     if __name__ == '__main__':
         x = ['Product A', 'Product B', 'Product C']
         y = [20, 14, 23]
@@ -952,7 +953,7 @@ if __name__ == '__main__':
         py.plot(data, filename='tmp/line_tutorial.html', auto_play=True)
 
 
-    # Rotated Bar Chart Labels
+    # Rotated Bar Chart Labels，layout的xaxis=dict(tickangle=-45)
     if __name__ == '__main__':
         trace0 = go.Bar(
             x=['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -1016,7 +1017,7 @@ if __name__ == '__main__':
         fig = go.Figure(data=data)
         py.plot(fig, filename='tmp/line_tutorial.html', auto_play=True)
 
-    # Customizing Individual Bar Base
+    # Customizing Individual Bar Base，base=[-500, -600, -700]
     if __name__ == '__main__':
         data = [
             go.Bar(
@@ -1041,6 +1042,7 @@ if __name__ == '__main__':
 
         fig = go.Figure(data=data)
         py.plot(fig, filename='tmp/line_tutorial.html', auto_play=True)
+
 
     # Colored and Styled Bar Chart
     if __name__ == '__main__':
@@ -1092,7 +1094,7 @@ if __name__ == '__main__':
             ),
             barmode='group',
             bargap=0.15,
-            bargroupgap=0.1
+            bargroupgap=0
         )
 
         fig = go.Figure(data=data, layout=layout)
@@ -1172,6 +1174,7 @@ if __name__ == '__main__':
         fig = go.Figure(data=data, layout=layout)
         py.plot(fig, filename='tmp/line_tutorial.html', auto_play=True)
 
+
     # Bar Chart with Relative Barmode
     if __name__ == '__main__':
         x = [1, 2, 3, 4]
@@ -1181,13 +1184,13 @@ if __name__ == '__main__':
             'y': [1, 4, 9, 16],
             'name': 'Trace1',
             'type': 'bar'
-        };
+        }
         trace2 = {
             'x': x,
             'y': [6, -8, -4.5, 8],
             'name': 'Trace2',
             'type': 'bar'
-        };
+        }
         trace3 = {
             'x': x,
             'y': [-15, -3, 4.5, -8],
@@ -1202,13 +1205,13 @@ if __name__ == '__main__':
             'type': 'bar'
         }
 
-        data = [trace1, trace2, trace3, trace4];
+        data = [trace1, trace2, trace3, trace4]
         layout = {
             'xaxis': {'title': 'X axis'},
             'yaxis': {'title': 'Y axis'},
             'barmode': 'relative',
             'title': 'Relative Barmode'
-        };
+        }
         py.plot({'data': data, 'layout': layout}, filename='tmp/line_tutorial.html', auto_play=True)
 
 
@@ -1393,7 +1396,7 @@ if __name__ == '__main__':
         data = [trace1, trace2]
         py.plot(data, filename='tmp/fill_tutorial.html', auto_play=True)
 
-    # Overlaid Area Chart Without Boundary Lines
+    # Overlaid Area Chart Without Boundary Lines，tonexty就是邻近的y
     if __name__ == '__main__':
         trace1 = go.Scatter(
             x=[1, 2, 3, 4],
@@ -1473,7 +1476,7 @@ if __name__ == '__main__':
         py.plot(fig, filename='tmp/fill_tutorial.html', auto_play=True)
 
 
-    # Stacked Area Chart with Normalized Values
+    # Stacked Area Chart with Normalized Values，stackgroup he groupnorm
     if __name__ == '__main__':
         trace0 = dict(
             x=['Winter', 'Spring', 'Summer', 'Fall'],
@@ -1688,7 +1691,7 @@ if __name__ == '__main__':
     import plotly.offline as py
     import plotly.graph_objs as go
 
-    # basic
+    # basic，最基础的也能移动列
     if __name__ == '__main__':
         trace = go.Table(
             header=dict(values=['A Scores', 'B Scores']),
@@ -1699,7 +1702,7 @@ if __name__ == '__main__':
         py.plot(data, filename='tmp/table_tutorial.html', auto_play=True)
 
 
-    # Styled Table
+    # Styled Table，layout = dict(width=500, height=300)定义高度和宽度
     if __name__ == '__main__':
         trace = go.Table(
             header=dict(values=['A Scores', 'B Scores'],
@@ -1736,15 +1739,17 @@ if __name__ == '__main__':
         py.plot(data, filename='tmp/table_tutorial.html', auto_play=True)
 
 
-    # Changing Row and Column Size
+    # Changing Row and Column Size，这里定义宽高 columnorder=[1, 2], columnwidth=[80, 400],
     if __name__ == '__main__':
-        values = [[['Salaries', 'Office', 'Merchandise', 'Legal', '<b>TOTAL<br>EXPENSES</b>']],
-                  [[
+        values = [['Salaries', 'Office', 'Merchandise', 'Legal', '<b>TOTAL<br>EXPENSES</b>'],
+                  [
                        "Lorem ipsum dolor sit amet, tollit discere inermis pri ut. Eos ea iusto timeam, an prima laboramus vim. Id usu aeterno adversarium, summo mollis timeam vel ad",
                        "Lorem ipsum dolor sit amet, tollit discere inermis pri ut. Eos ea iusto timeam, an prima laboramus vim. Id usu aeterno adversarium, summo mollis timeam vel ad",
                        "Lorem ipsum dolor sit amet, tollit discere inermis pri ut. Eos ea iusto timeam, an prima laboramus vim. Id usu aeterno adversarium, summo mollis timeam vel ad",
                        "Lorem ipsum dolor sit amet, tollit discere inermis pri ut. Eos ea iusto timeam, an prima laboramus vim. Id usu aeterno adversarium, summo mollis timeam vel ad",
-                       "Lorem ipsum dolor sit amet, tollit discere inermis pri ut. Eos ea iusto timeam, an prima laboramus vim. Id usu aeterno adversarium, summo mollis timeam vel ad"]]]
+                       "Lorem ipsum dolor sit amet, tollit discere inermis pri ut. Eos ea iusto timeam, an prima laboramus vim. Id usu aeterno adversarium, summo mollis timeam vel ad"
+                  ]
+                 ]
 
         trace0 = go.Table(
             columnorder=[1, 2],
@@ -1791,11 +1796,12 @@ if __name__ == '__main__':
             ),
             cells=dict(
                 values=[
-                    [['Salaries', 'Office', 'Merchandise', 'Legal', '<b>TOTAL</b>']],
-                    [[1200000, 20000, 80000, 2000, 12120000]],
-                    [[1300000, 20000, 70000, 2000, 130902000]],
-                    [[1300000, 20000, 120000, 2000, 131222000]],
-                    [[1400000, 20000, 90000, 2000, 14102000]]],
+                    ['Salaries', 'Office', 'Merchandise', 'Legal', '<b>TOTAL</b>'],
+                    [1200000, 20000, 80000, 2000, 12120000],
+                    [1300000, 20000, 70000, 2000, 130902000],
+                    [1300000, 20000, 120000, 2000, 131222000],
+                    [1400000, 20000, 90000, 2000, 14102000]
+                ],
                 line=dict(color='#506784'),
                 fill=dict(color=[rowOddColor, rowEvenColor, rowOddColor, rowEvenColor, rowOddColor]),
                 align=['left', 'center'],
