@@ -57,16 +57,12 @@ df_long_columns = pd.DataFrame(
 app = dash.Dash(__name__)
 
 app.layout = dash_table.DataTable(
-    data=df.to_dict('rows'),
+    data=df_long.to_dict('rows'),
     columns=[{'id': c, 'name': c} for c in df.columns],
-    style_cell_conditional=[
-        {'if': {'column_id': 'Temperature'},
-         'width': '130px'},
-        {'if': {'column_id': 'Humidity'},
-         'width': '130px'},
-        {'if': {'column_id': 'Pressure'},
-         'width': '130px'},
-    ]
+    style_table={
+        'maxHeight': '300',
+        'overflowY': 'scroll'
+    },
 )
 
 if __name__ == '__main__':
