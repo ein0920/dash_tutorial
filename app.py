@@ -57,20 +57,14 @@ df_long_columns = pd.DataFrame(
 app = dash.Dash(__name__)
 
 app.layout = dash_table.DataTable(
-    data=df_election.to_dict('rows'),
-    columns=[{'id': c, 'name': c} for c in df_election.columns],
-    n_fixed_columns=1,
-    style_cell={
-        # all three widths are needed
-        'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-        'whiteSpace': 'no-wrap',
-        'overflow': 'hidden',
-        'textOverflow': 'ellipsis',
-    },
-    css=[{
-        'selector': '.dash-cell div.dash-cell-value',
-        'rule': 'display: inline; white-space: inherit; overflow: inherit; text-overflow: inherit;'
-    }],
+    data=df.to_dict('rows'),
+    columns=[{'id': c, 'name': c} for c in df.columns],
+    style_cell_conditional=[
+        {'if': {'column_id': 'Date'},
+         'width': '30%'},
+        {'if': {'column_id': 'Region'},
+         'width': '30%'},
+    ]
 )
 
 if __name__ == '__main__':
