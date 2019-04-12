@@ -63,7 +63,9 @@ app.layout = dash_table.DataTable(
     style_cell={
         # all three widths are needed
         'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
-        'whiteSpace': 'normal'
+        'whiteSpace': 'no-wrap',
+        'overflow': 'hidden',
+        'textOverflow': 'ellipsis',
     },
     css=[{
         'selector': '.dash-cell div.dash-cell-value',
