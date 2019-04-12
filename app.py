@@ -61,10 +61,9 @@ app.layout = dash_table.DataTable(
     columns=[{'id': c, 'name': c} for c in df_election.columns],
     style_table={'overflowX': 'scroll'},
     style_cell={
-        'minWidth': '0px', 'maxWidth': '180px',
-        'whiteSpace': 'no-wrap',
-        'overflow': 'hidden',
-        'textOverflow': 'ellipsis',
+        # all three widths are needed
+        'minWidth': '180px', 'width': '180px', 'maxWidth': '180px',
+        'whiteSpace': 'normal'
     },
     css=[{
         'selector': '.dash-cell div.dash-cell-value',
