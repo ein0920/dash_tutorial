@@ -59,16 +59,7 @@ app = dash.Dash(__name__)
 app.layout = dash_table.DataTable(
     data=df_election.to_dict('rows'),
     columns=[{'id': c, 'name': c} for c in df_election.columns],
-    css=[{
-        'selector': '.dash-cell div.dash-cell-value',
-        'rule': 'display: inline; white-space: inherit; overflow: inherit; text-overflow: inherit;'
-    }],
-    style_cell={
-        'whiteSpace': 'no-wrap',
-        'overflow': 'hidden',
-        'textOverflow': 'ellipsis',
-        'maxWidth': 0,
-    },
+    style_table={'overflowX': 'scroll'},
 )
 
 if __name__ == '__main__':
