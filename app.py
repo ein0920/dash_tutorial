@@ -57,11 +57,15 @@ df_long_columns = pd.DataFrame(
 app = dash.Dash(__name__)
 
 app.layout = dash_table.DataTable(
-    data=df_long.to_dict('rows'),
-    columns=[{'id': c, 'name': c} for c in df_long.columns],
-    n_fixed_rows=1,
-    style_cell={'width': '150px'}
+    data=df.to_dict('rows'),
+    columns=[{'id': c, 'name': c} for c in df.columns],
+    style_table={
+        'maxHeight': '300px',
+        'overflowY': 'scroll',
+        'border': 'thin lightgrey solid'
+    },
 )
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
