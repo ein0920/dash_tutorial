@@ -57,13 +57,18 @@ df_long_columns = pd.DataFrame(
 app = dash.Dash(__name__)
 
 app.layout = dash_table.DataTable(
-    style_data={'whiteSpace': 'normal'},
+    data=df_election.to_dict('rows'),
+    columns=[{'id': c, 'name': c} for c in df_election.columns],
     css=[{
         'selector': '.dash-cell div.dash-cell-value',
         'rule': 'display: inline; white-space: inherit; overflow: inherit; text-overflow: inherit;'
     }],
-    data=df_election.to_dict('rows'),
-    columns=[{'id': c, 'name': c} for c in df_election.columns]
+    style_cell={
+        'whiteSpace': 'no-wrap',
+        'overflow': 'hidden',
+        'textOverflow': 'ellipsis',
+        'maxWidth': 0,
+    },
 )
 
 if __name__ == '__main__':
