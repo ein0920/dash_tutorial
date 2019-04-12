@@ -60,7 +60,7 @@ app.layout = dash_table.DataTable(
     data=df.to_dict('rows'),
     columns=[{'id': c, 'name': c} for c in df.columns],
     style_table={
-        'maxHeight': '300px',
+        'height': '300px',
         'overflowY': 'scroll',
         'border': 'thin lightgrey solid'
     },
