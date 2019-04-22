@@ -1,66 +1,66 @@
-import base64
-import datetime
-import io
 import dash
 from dash.dependencies import Input, Output, State
+import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
-import dash_table
 import pandas as pd
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__)
 
 app.layout = html.Div([
-    dcc.Upload(
-        id='datatable-upload',
-        children=html.Div([
-            'Drag and Drop or ',
-            html.A('Select Files')
-        ]),
-        style={
-            'width': '100%', 'height': '60px', 'lineHeight': '60px',
-            'borderWidth': '1px', 'borderStyle': 'dashed',
-            'borderRadius': '5px', 'textAlign': 'center', 'margin': '10px'
-        },
+    html.Div([
+        dcc.Input(
+            id='editing-columns-name',
+            placeholder='Enter a column name...',
+            value='',
+            style={'padding': 10}
+        ),
+        html.Button('Add Column', id='editing-columns-button', n_clicks=0)
+    ], style={'height': 50}),
+
+    dash_table.DataTable(
+        id='editing-columns',
+        columns=[{
+            'name': 'Column {}'.format(i),
+            'id': 'column-{}'.format(i),
+            'deletable': True,
+            'editable_name': True
+        } for i in range(1, 5)],
+        data=[
+            {'column-{}'.format(i): (j + (i-1)*5) for i in range(1, 5)}
+            for j in range(5)
+        ],
+        editable=True,
     ),
-    dash_table.DataTable(id='datatable-upload-container'),
-    dcc.Graph(id='datatable-upload-graph')
+
+    dcc.Graph(id='editing-columns-graph')
 ])
 
 
-def parse_contents(contents, filename):
-    content_type, content_string = contents.split(',')
-    decoded = base64.b64decode(content_string)
-    if 'csv' in filename:
-        # Assume that the user uploaded a CSV file
-        return pd.read_csv(
-            io.StringIO(decoded.decode('utf-8')))
-    elif 'xls' in filename:
-        # Assume that the user uploaded an excel file
-        return pd.read_excel(io.BytesIO(decoded))
+@app.callback(
+    Output('editing-columns', 'columns'),
+    [Input('editing-columns-button', 'n_clicks')],
+    [State('editing-columns-name', 'value'),
+     State('editing-columns', 'columns')])
+def update_columns(n_clicks, value, existing_columns):
+    if n_clicks > 0:
+        existing_columns.append({
+            'id': value, 'name': value,
+            'editable_name': True, 'deletable': True
+        })
+    return existing_columns
 
 
-@app.callback(Output('datatable-upload-container', 'data'),
-              [Input('datatable-upload', 'contents')],
-              [State('datatable-upload', 'filename')])
-def update_output(contents, filename):
-    if contents is None:
-        return [{}]
-    df = parse_contents(contents, filename)
-    return df.to_dict('rows')
-
-
-@app.callback(Output('datatable-upload-graph', 'figure'),
-              [Input('datatable-upload-container', 'data')])
-def display_graph(rows):
-    df = pd.DataFrame(rows)
+@app.callback(
+    Output('editing-columns-graph', 'figure'),
+    [Input('editing-columns', 'data'),
+     Input('editing-columns', 'columns')])
+def display_output(rows, columns):
     return {
         'data': [{
-            'x': df[df.columns[0]],
-            'y': df[df.columns[1]],
-            'type': 'bar'
+            'type': 'heatmap',
+            'z': [[row.get(c['id'], None) for c in columns] for row in rows],
+            'x': [c['name'] for c in columns]
         }]
     }
 
