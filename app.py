@@ -1,23 +1,19 @@
 import dash
 from dash.dependencies import Input, Output
 import dash_table
-import dash_html_components as html
-import dash_core_components as dcc
 import pandas as pd
 
 
-df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
-
-df[' index'] = range(1, len(df) + 1)
-
 app = dash.Dash(__name__)
+
+df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
 
 PAGE_SIZE = 5
 
 app.layout = dash_table.DataTable(
-    id='table-paging-and-sorting',
+    id='table-multicol-sorting',
     columns=[
-        {'name': i, 'id': i, 'deletable': True} for i in sorted(df.columns)
+        {"name": i, "id": i} for i in sorted(df.columns)
     ],
     pagination_settings={
         'current_page': 0,
@@ -26,20 +22,24 @@ app.layout = dash_table.DataTable(
     pagination_mode='be',
 
     sorting='be',
-    sorting_type='single',
+    sorting_type='multi',
     sorting_settings=[]
 )
 
 
 @app.callback(
-    Output('table-paging-and-sorting', 'data'),
-    [Input('table-paging-and-sorting', 'pagination_settings'),
-     Input('table-paging-and-sorting', 'sorting_settings')])
+    Output('table-multicol-sorting', "data"),
+    [Input('table-multicol-sorting', "pagination_settings"),
+     Input('table-multicol-sorting', "sorting_settings")])
 def update_graph(pagination_settings, sorting_settings):
+    print(sorting_settings)
     if len(sorting_settings):
         dff = df.sort_values(
-            sorting_settings[0]['column_id'],
-            ascending=sorting_settings[0]['direction'] == 'asc',
+            [col['column_id'] for col in sorting_settings],
+            ascending=[
+                col['direction'] == 'asc'
+                for col in sorting_settings
+            ],
             inplace=False
         )
     else:
