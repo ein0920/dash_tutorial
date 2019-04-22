@@ -8,10 +8,12 @@ app = dash.Dash(__name__)
 
 df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
 
+
 PAGE_SIZE = 5
 
+
 app.layout = dash_table.DataTable(
-    id='table-multicol-sorting',
+    id='table-filtering',
     columns=[
         {"name": i, "id": i} for i in sorted(df.columns)
     ],
@@ -21,30 +23,32 @@ app.layout = dash_table.DataTable(
     },
     pagination_mode='be',
 
-    sorting='be',
-    sorting_type='multi',
-    sorting_settings=[]
+    filtering='be',
+    filtering_settings=''
 )
 
 
 @app.callback(
-    Output('table-multicol-sorting', "data"),
-    [Input('table-multicol-sorting', "pagination_settings"),
-     Input('table-multicol-sorting', "sorting_settings")])
-def update_graph(pagination_settings, sorting_settings):
-    print(sorting_settings)
-    if len(sorting_settings):
-        dff = df.sort_values(
-            [col['column_id'] for col in sorting_settings],
-            ascending=[
-                col['direction'] == 'asc'
-                for col in sorting_settings
-            ],
-            inplace=False
-        )
-    else:
-        # No sort is applied
-        dff = df
+    Output('table-filtering', "data"),
+    [Input('table-filtering', "pagination_settings"),
+     Input('table-filtering', "filtering_settings")])
+def update_graph(pagination_settings, filtering_settings):
+    print(filtering_settings)
+    filtering_expressions = filtering_settings.split(' && ')
+    dff = df
+    for filter in filtering_expressions:
+        if ' eq ' in filter:
+            col_name = filter.split(' eq ')[0]
+            filter_value = filter.split(' eq ')[1]
+            dff = dff.loc[dff[col_name] == filter_value]
+        if ' > ' in filter:
+            col_name = filter.split(' > ')[0]
+            filter_value = float(filter.split(' > ')[1])
+            dff = dff.loc[dff[col_name] > filter_value]
+        if ' < ' in filter:
+            col_name = filter.split(' < ')[0]
+            filter_value = float(filter.split(' < ')[1])
+            dff = dff.loc[dff[col_name] < filter_value]
 
     return dff.iloc[
         pagination_settings['current_page']*pagination_settings['page_size']:
