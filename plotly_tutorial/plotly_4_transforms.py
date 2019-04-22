@@ -27,6 +27,7 @@ if __name__ == '__main__':
         )
         py.plot({'data': data, 'layout': layout}, filename='tmp/transforms_tutorial.html', auto_play=True, validate=False)
 
+
 # Group By in Python
 if __name__ == '__main__':
     import plotly.offline as py

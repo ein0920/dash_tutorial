@@ -1428,6 +1428,7 @@ if __name__ == '__main__':
         fig = go.Figure(data=data, layout=layout)
         py.plot(fig, filename='tmp/style_tutorial.html', auto_play=True)
 
+
 # 7 3D Surface Coloring in Python
 if __name__ == '__main__':
     import plotly.offline as py

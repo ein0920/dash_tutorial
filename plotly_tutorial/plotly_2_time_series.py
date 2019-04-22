@@ -117,6 +117,7 @@ if __name__ == '__main__':
 
         py.plot(fig, filename='tmp/timeseries_tutorial.html',auto_play=True)
 
+
 # candlestick，ohlc换一下就可以了
 if __name__ == '__main__':
     import plotly.offline as py

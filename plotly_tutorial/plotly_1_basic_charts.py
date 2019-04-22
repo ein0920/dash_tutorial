@@ -1570,6 +1570,7 @@ if __name__ == '__main__':
         fig = go.Figure(data=data, layout=layout)
         py.plot(fig, filename='tmp/fill_tutorial.html', auto_play=True)
 
+
 # 8、Dot Plots in Python
 if __name__ == '__main__':
     import plotly.offline as py

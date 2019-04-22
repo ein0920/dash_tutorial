@@ -670,6 +670,7 @@ if __name__ == '__main__':
     fig = go.Figure(data=data, layout=layout)
     py.plot(fig, filename='tmp/multi_tutorial.html', auto_play=True)
 
+
 # figure factory
 if __name__ == '__main__':
     import plotly.offline as py
@@ -774,6 +775,7 @@ if __name__ == '__main__':
         # the plot height calculated for the table
         figure.layout.update({'height': 800})
         py.plot(figure, filename='tmp/multi_tutorial.html', auto_play=True)
+
 
 # Table and Chart Subplots
 if __name__ == '__main__':

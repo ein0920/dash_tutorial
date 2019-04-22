@@ -1375,36 +1375,3 @@ if __name__ == '__main__':
     if __name__ == '__main__':
         py.plot(fig, filename='tmp/layout_tutorial.html', auto_play=True)
 
-    #
-    if __name__ == '__main__':
-        py.plot(fig, filename='tmp/layout_tutorial.html', auto_play=True)
-
-    #
-    if __name__ == '__main__':
-        py.plot(fig, filename='tmp/layout_tutorial.html', auto_play=True)
-
-    #
-    if __name__ == '__main__':
-        py.plot(fig, filename='tmp/layout_tutorial.html', auto_play=True)
-
-    #
-    if __name__ == '__main__':
-        py.plot(fig, filename='tmp/layout_tutorial.html', auto_play=True)
-
-    #
-    if __name__ == '__main__':
-        py.plot(fig, filename='tmp/layout_tutorial.html', auto_play=True)
-
-    #
-    if __name__ == '__main__':
-        py.plot(fig, filename='tmp/layout_tutorial.html', auto_play=True)
-
-    #
-    if __name__ == '__main__':
-        py.plot(fig, filename='tmp/layout_tutorial.html', auto_play=True)
-
-    #
-    if __name__ == '__main__':
-        py.plot(fig, filename='tmp/layout_tutorial.html', auto_play=True)
-
-

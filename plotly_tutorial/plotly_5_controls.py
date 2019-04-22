@@ -1130,10 +1130,3 @@ if __name__ == '__main__':
         fig = go.Figure(data=data, layout=layout)
         py.plot(fig, filename='tmp/control_tutorial.html', auto_play=True)
 
-    #
-    if __name__ == '__main__':
-        py.plot(fig, filename='tmp/control_tutorial.html', auto_play=True)
-
-    #
-    if __name__ == '__main__':
-        py.plot(fig, filename='tmp/control_tutorial.html', auto_play=True)

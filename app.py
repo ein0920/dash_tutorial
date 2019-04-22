@@ -1,58 +1,97 @@
 import dash
+from dash.dependencies import Input, Output
+import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
-import plotly.graph_objs as go
+import pandas as pd
 
+df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
 
-external_stylesheets = ['static/css/bWLwgP.css']
+app = dash.Dash(__name__)
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
-app.layout = html.Div(children=[
-    html.H1(children='Dash and Plotly'),
-
-    html.Div(children='''
-        这里显示Dash和Plotly的画图模块的用法.
-    '''),
-
-    dcc.Graph(
-        figure=go.Figure(
-            data=[
-                go.Bar(
-                    x=[1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-                       2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012],
-                    y=[219, 146, 112, 127, 124, 180, 236, 207, 236, 263,
-                       350, 430, 474, 526, 488, 537, 500, 439],
-                    name='Rest of world',
-                    marker=go.bar.Marker(
-                        color='rgb(55, 83, 109)'
-                    )
-                ),
-                go.Bar(
-                    x=[1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-                       2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012],
-                    y=[16, 13, 10, 11, 28, 37, 43, 55, 56, 88, 105, 156, 270,
-                       299, 340, 403, 549, 499],
-                    name='China',
-                    marker=go.bar.Marker(
-                        color='rgb(26, 118, 255)'
-                    )
-                )
-            ],
-            layout=go.Layout(
-                title='US Export of Plastic Scrap',
-                showlegend=True,
-                legend=go.layout.Legend(
-                    x=0,
-                    y=1.0
-                ),
-                margin=go.layout.Margin(l=40, r=0, t=40, b=30)
-            )
-        ),
-        style={'height': 300},
-        id='my-graph'
-    )
+app.layout = html.Div([
+    dash_table.DataTable(
+        id='datatable-interactivity',
+        columns=[
+            {"name": i, "id": i, "deletable": True} for i in df.columns
+        ],
+        data=df.to_dict("rows"),
+        editable=True,
+        filtering=True,
+        sorting=True,
+        sorting_type="multi",
+        row_selectable="multi",
+        row_deletable=True,
+        selected_rows=[],
+        pagination_mode="fe",
+            pagination_settings={
+                "displayed_pages": 1,
+                "current_page": 0,
+                "page_size": 35,
+            },
+            navigation="page",
+    ),
+    html.Div(id='datatable-interactivity-container')
 ])
+
+@app.callback(
+    Output('datatable-interactivity-container', "children"),
+    [Input('datatable-interactivity', "derived_virtual_data"),
+     Input('datatable-interactivity', "derived_virtual_selected_rows")])
+def update_graph(rows, derived_virtual_selected_rows):
+    # When the table is first rendered, `derived_virtual_data` and
+    # `derived_virtual_selected_rows` will be `None`. This is due to an
+    # idiosyncracy in Dash (unsupplied properties are always None and Dash
+    # calls the dependent callbacks when the component is first rendered).
+    # So, if `rows` is `None`, then the component was just rendered
+    # and its value will be the same as the component's dataframe.
+    # Instead of setting `None` in here, you could also set
+    # `derived_virtual_data=df.to_rows('dict')` when you initialize
+    # the component.
+    if derived_virtual_selected_rows is None:
+        derived_virtual_selected_rows = []
+
+    if rows is None:
+        dff = df
+    else:
+        dff = pd.DataFrame(rows)
+
+    colors = []
+    for i in range(len(dff)):
+        if i in derived_virtual_selected_rows:
+            colors.append("#7FDBFF")
+        else:
+            colors.append("#0074D9")
+
+    return html.Div(
+        [
+            dcc.Graph(
+                id=column,
+                figure={
+                    "data": [
+                        {
+                            "x": dff["country"],
+                            # check if column exists - user may have deleted it
+                            # If `column.deletable=False`, then you don't
+                            # need to do this check.
+                            "y": dff[column] if column in dff else [],
+                            "type": "bar",
+                            "marker": {"color": colors},
+                        }
+                    ],
+                    "layout": {
+                        "xaxis": {"automargin": True},
+                        "yaxis": {"automargin": True},
+                        "height": 250,
+                        "margin": {"t": 10, "l": 10, "r": 10},
+                    },
+                },
+            )
+            for column in ["pop", "lifeExp", "gdpPercap"]
+        ]
+    )
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
