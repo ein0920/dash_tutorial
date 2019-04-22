@@ -1,8 +1,9 @@
 import dash
 from dash.dependencies import Input, Output
+import dash_core_components as dcc
+import dash_html_components as html
 import dash_table
 import pandas as pd
-
 
 app = dash.Dash(__name__)
 
@@ -10,31 +11,44 @@ df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapmi
 
 PAGE_SIZE = 5
 
-app.layout = dash_table.DataTable(
-    id='table-sorting-filtering',
-    columns=[
-        {'name': i, 'id': i, 'deletable': True} for i in sorted(df.columns)
-    ],
-    pagination_settings={
-        'current_page': 0,
-        'page_size': PAGE_SIZE
-    },
-    pagination_mode='be',
+app.layout = html.Div(
+    className="row",
+    children=[
+        html.Div(
+            dash_table.DataTable(
+                id='table-paging-with-graph',
+                columns=[
+                    {"name": i, "id": i} for i in sorted(df.columns)
+                ],
+                pagination_settings={
+                    'current_page': 0,
+                    'page_size': 20
+                },
+                pagination_mode='be',
 
-    filtering='be',
-    filtering_settings='',
+                filtering='be',
+                filtering_settings='',
 
-    sorting='be',
-    sorting_type='multi',
-    sorting_settings=[]
+                sorting='be',
+                sorting_type='multi',
+                sorting_settings=[]
+            ),
+            style={'height': 750, 'overflowY': 'scroll'},
+            className='six columns'
+        ),
+        html.Div(
+            id='table-paging-with-graph-container',
+            className="five columns"
+        )
+    ]
 )
 
 @app.callback(
-    Output('table-sorting-filtering', 'data'),
-    [Input('table-sorting-filtering', 'pagination_settings'),
-     Input('table-sorting-filtering', 'sorting_settings'),
-     Input('table-sorting-filtering', 'filtering_settings')])
-def update_graph(pagination_settings, sorting_settings, filtering_settings):
+    Output('table-paging-with-graph', "data"),
+    [Input('table-paging-with-graph', "pagination_settings"),
+     Input('table-paging-with-graph', "sorting_settings"),
+     Input('table-paging-with-graph', "filtering_settings")])
+def update_table(pagination_settings, sorting_settings, filtering_settings):
     filtering_expressions = filtering_settings.split(' && ')
     dff = df
     for filter in filtering_expressions:
@@ -65,6 +79,37 @@ def update_graph(pagination_settings, sorting_settings, filtering_settings):
         pagination_settings['current_page']*pagination_settings['page_size']:
         (pagination_settings['current_page'] + 1)*pagination_settings['page_size']
     ].to_dict('rows')
+
+
+@app.callback(
+    Output('table-paging-with-graph-container', "children"),
+    [Input('table-paging-with-graph', "data")])
+def update_graph(rows):
+    dff = pd.DataFrame(rows)
+    return html.Div(
+        [
+            dcc.Graph(
+                id=column,
+                figure={
+                    "data": [
+                        {
+                            "x": dff["country"],
+                            "y": dff[column] if column in dff else [],
+                            "type": "bar",
+                            "marker": {"color": "#0074D9"},
+                        }
+                    ],
+                    "layout": {
+                        "xaxis": {"automargin": True},
+                        "yaxis": {"automargin": True},
+                        "height": 250,
+                        "margin": {"t": 10, "l": 10, "r": 10},
+                    },
+                },
+            )
+            for column in ["pop", "lifeExp", "gdpPercap"]
+        ]
+    )
 
 
 if __name__ == '__main__':
