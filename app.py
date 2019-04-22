@@ -10,16 +10,16 @@ app = dash.Dash(__name__)
 app.layout = html.Div([
     html.Div([
         dcc.Input(
-            id='editing-columns-name',
+            id='adding-rows-name',
             placeholder='Enter a column name...',
             value='',
             style={'padding': 10}
         ),
-        html.Button('Add Column', id='editing-columns-button', n_clicks=0)
+        html.Button('Add Column', id='adding-rows-button', n_clicks=0)
     ], style={'height': 50}),
 
     dash_table.DataTable(
-        id='editing-columns',
+        id='adding-rows-table',
         columns=[{
             'name': 'Column {}'.format(i),
             'id': 'column-{}'.format(i),
@@ -31,17 +31,31 @@ app.layout = html.Div([
             for j in range(5)
         ],
         editable=True,
+        row_deletable=True
     ),
 
-    dcc.Graph(id='editing-columns-graph')
+    html.Button('Add Row', id='editing-rows-button', n_clicks=0),
+
+    dcc.Graph(id='adding-rows-graph')
 ])
 
 
 @app.callback(
-    Output('editing-columns', 'columns'),
-    [Input('editing-columns-button', 'n_clicks')],
-    [State('editing-columns-name', 'value'),
-     State('editing-columns', 'columns')])
+    Output('adding-rows-table', 'data'),
+    [Input('editing-rows-button', 'n_clicks')],
+    [State('adding-rows-table', 'data'),
+     State('adding-rows-table', 'columns')])
+def add_row(n_clicks, rows, columns):
+    if n_clicks > 0:
+        rows.append({c['id']: '' for c in columns})
+    return rows
+
+
+@app.callback(
+    Output('adding-rows-table', 'columns'),
+    [Input('adding-rows-button', 'n_clicks')],
+    [State('adding-rows-name', 'value'),
+     State('adding-rows-table', 'columns')])
 def update_columns(n_clicks, value, existing_columns):
     if n_clicks > 0:
         existing_columns.append({
@@ -52,9 +66,9 @@ def update_columns(n_clicks, value, existing_columns):
 
 
 @app.callback(
-    Output('editing-columns-graph', 'figure'),
-    [Input('editing-columns', 'data'),
-     Input('editing-columns', 'columns')])
+    Output('adding-rows-graph', 'figure'),
+    [Input('adding-rows-table', 'data'),
+     Input('adding-rows-table', 'columns')])
 def display_output(rows, columns):
     return {
         'data': [{
