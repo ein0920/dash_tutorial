@@ -8,14 +8,12 @@ app = dash.Dash(__name__)
 
 df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
 
-
 PAGE_SIZE = 5
 
-
 app.layout = dash_table.DataTable(
-    id='table-filtering',
+    id='table-sorting-filtering',
     columns=[
-        {"name": i, "id": i} for i in sorted(df.columns)
+        {'name': i, 'id': i, 'deletable': True} for i in sorted(df.columns)
     ],
     pagination_settings={
         'current_page': 0,
@@ -24,16 +22,19 @@ app.layout = dash_table.DataTable(
     pagination_mode='be',
 
     filtering='be',
-    filtering_settings=''
+    filtering_settings='',
+
+    sorting='be',
+    sorting_type='multi',
+    sorting_settings=[]
 )
 
-
 @app.callback(
-    Output('table-filtering', "data"),
-    [Input('table-filtering', "pagination_settings"),
-     Input('table-filtering', "filtering_settings")])
-def update_graph(pagination_settings, filtering_settings):
-    print(filtering_settings)
+    Output('table-sorting-filtering', 'data'),
+    [Input('table-sorting-filtering', 'pagination_settings'),
+     Input('table-sorting-filtering', 'sorting_settings'),
+     Input('table-sorting-filtering', 'filtering_settings')])
+def update_graph(pagination_settings, sorting_settings, filtering_settings):
     filtering_expressions = filtering_settings.split(' && ')
     dff = df
     for filter in filtering_expressions:
@@ -49,6 +50,16 @@ def update_graph(pagination_settings, filtering_settings):
             col_name = filter.split(' < ')[0]
             filter_value = float(filter.split(' < ')[1])
             dff = dff.loc[dff[col_name] < filter_value]
+
+    if len(sorting_settings):
+        dff = dff.sort_values(
+            [col['column_id'] for col in sorting_settings],
+            ascending=[
+                col['direction'] == 'asc'
+                for col in sorting_settings
+            ],
+            inplace=False
+        )
 
     return dff.iloc[
         pagination_settings['current_page']*pagination_settings['page_size']:
