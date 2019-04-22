@@ -1,36 +1,59 @@
 import dash
-from dash.dependencies import Input, Output, State
-import dash_table
-import dash_core_components as dcc
+from dash.dependencies import Input, Output
 import dash_html_components as html
+import dash_table
 import pandas as pd
+from collections import OrderedDict
+
 
 app = dash.Dash(__name__)
 
+df = pd.DataFrame(OrderedDict([
+    ('climate', ['Sunny', 'Snowy', 'Sunny', 'Rainy']),
+    ('temperature', [13, 43, 50, 30]),
+    ('city', ['NYC', 'Montreal', 'Miami', 'NYC'])
+]))
+
+
 app.layout = html.Div([
     dash_table.DataTable(
-        id='computed-table',
+        id='table-dropdown',
+        data=df.to_dict('rows'),
         columns=[
-            {'name': 'Input Data', 'id': 'input-data'},
-            {'name': 'Input Squared', 'id': 'output-data'}
+            {'id': 'climate', 'name': 'climate', 'presentation': 'dropdown'},
+            {'id': 'temperature', 'name': 'temperature'},
+            {'id': 'city', 'name': 'city', 'presentation': 'dropdown'},
         ],
-        data=[{'input-data': i} for i in range(11)],
+
         editable=True,
+        column_static_dropdown=[
+            {
+                'id': 'climate',
+                'dropdown': [
+                    {'label': i, 'value': i}
+                    for i in df['climate'].unique()
+                ]
+            },
+            {
+                'id': 'city',
+                'dropdown': [
+                    {'label': i, 'value': i}
+                    for i in df['city'].unique()
+                ]
+            },
+        ]
     ),
+    html.Div(id='table-dropdown-container')
 ])
 
 
-@app.callback(
-    Output('computed-table', 'data'),
-    [Input('computed-table', 'data_timestamp')],
-    [State('computed-table', 'data')])
-def update_columns(timestamp, rows):
-    for row in rows:
-        try:
-            row['output-data'] = float(row['input-data']) ** 2
-        except:
-            row['output-data'] = 'NA'
-    return rows
+# In order for the changes in the dropdown to persist,
+# the dropdown needs to be "connected" to the table via
+# a callback
+@app.callback(Output('table-dropdown-container', 'children'),
+              [Input('table-dropdown', 'data_timestamp')])
+def update_output(timestamp):
+    return timestamp
 
 
 if __name__ == '__main__':
