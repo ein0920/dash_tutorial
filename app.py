@@ -1,46 +1,69 @@
+import base64
+import datetime
+import io
 import dash
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
+import dash_core_components as dcc
 import dash_html_components as html
 import dash_table
+import pandas as pd
 
-import pprint
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = dash.Dash(__name__)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div([
-    dash_table.DataTable(
-        id='editing-prune-data',
-        columns=[{
-            'name': 'Column {}'.format(i),
-            'id': 'column-{}'.format(i)
-        } for i in range(1, 5)],
-        data=[
-            {'column-{}'.format(i): (j + (i-1)*5) for i in range(1, 5)}
-            for j in range(5)
-        ],
-        editable=True
+    dcc.Upload(
+        id='datatable-upload',
+        children=html.Div([
+            'Drag and Drop or ',
+            html.A('Select Files')
+        ]),
+        style={
+            'width': '100%', 'height': '60px', 'lineHeight': '60px',
+            'borderWidth': '1px', 'borderStyle': 'dashed',
+            'borderRadius': '5px', 'textAlign': 'center', 'margin': '10px'
+        },
     ),
-    html.Div(id='editing-prune-data-output')
+    dash_table.DataTable(id='datatable-upload-container'),
+    dcc.Graph(id='datatable-upload-graph')
 ])
 
 
-@app.callback(Output('editing-prune-data-output', 'children'),
-              [Input('editing-prune-data', 'data')])
-def display_output(rows):
-    pruned_rows = []
-    for row in rows:
-        # require that all elements in a row are specified
-        # the pruning behavior that you need may be different than this
-        if all([cell != '' for cell in row.values()]):
-            pruned_rows.append(row)
+def parse_contents(contents, filename):
+    content_type, content_string = contents.split(',')
+    decoded = base64.b64decode(content_string)
+    if 'csv' in filename:
+        # Assume that the user uploaded a CSV file
+        return pd.read_csv(
+            io.StringIO(decoded.decode('utf-8')))
+    elif 'xls' in filename:
+        # Assume that the user uploaded an excel file
+        return pd.read_excel(io.BytesIO(decoded))
 
-    return html.Div([
-        html.Div('Raw Data'),
-        html.Pre(pprint.pformat(rows)),
-        html.Hr(),
-        html.Div('Pruned Data'),
-        html.Pre(pprint.pformat(pruned_rows)),
-    ])
+
+@app.callback(Output('datatable-upload-container', 'data'),
+              [Input('datatable-upload', 'contents')],
+              [State('datatable-upload', 'filename')])
+def update_output(contents, filename):
+    if contents is None:
+        return [{}]
+    df = parse_contents(contents, filename)
+    return df.to_dict('rows')
+
+
+@app.callback(Output('datatable-upload-graph', 'figure'),
+              [Input('datatable-upload-container', 'data')])
+def display_graph(rows):
+    df = pd.DataFrame(rows)
+    return {
+        'data': [{
+            'x': df[df.columns[0]],
+            'y': df[df.columns[1]],
+            'type': 'bar'
+        }]
+    }
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)
