@@ -81,14 +81,14 @@ def generate_figure(value, figure):
     return fig
 
 
-@app.callback(Output('signal', 'children'), [Input('dropdown', 'value')])
-def compute_value(value):
-    # compute value and send a signal when done
-    global_store(value)
-    return value
+# @app.callback(Output('signal', 'children'), [Input('dropdown', 'value')])
+# def compute_value(value):
+#     # compute value and send a signal when done
+#     global_store(value)
+#     return value
 
 
-@app.callback(Output('graph-1', 'figure'), [Input('signal', 'children')])
+@app.callback(Output('graph-1', 'figure'), [Input('dropdown', 'value')])
 def update_graph_1(value):
     # generate_figure gets data from `global_store`.
     # the data in `global_store` has already been computed
@@ -107,7 +107,7 @@ def update_graph_1(value):
     })
 
 
-@app.callback(Output('graph-2', 'figure'), [Input('signal', 'children')])
+@app.callback(Output('graph-2', 'figure'), [Input('dropdown', 'value')])
 def update_graph_2(value):
     return generate_figure(value, {
         'data': [{
@@ -118,7 +118,7 @@ def update_graph_2(value):
     })
 
 
-@app.callback(Output('graph-3', 'figure'), [Input('signal', 'children')])
+@app.callback(Output('graph-3', 'figure'), [Input('dropdown', 'value')])
 def update_graph_3(value):
     return generate_figure(value, {
         'data': [{
@@ -127,7 +127,7 @@ def update_graph_3(value):
     })
 
 
-@app.callback(Output('graph-4', 'figure'), [Input('signal', 'children')])
+@app.callback(Output('graph-4', 'figure'), [Input('dropdown', 'value')])
 def update_graph_4(value):
     return generate_figure(value, {
         'data': [{
