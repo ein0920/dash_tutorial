@@ -1,50 +1,46 @@
 import dash
 from dash.dependencies import Input, Output
-import dash_table
-import dash_core_components as dcc
 import dash_html_components as html
-import pandas as pd
+import dash_table
+
+import pprint
 
 app = dash.Dash(__name__)
 
-params = [
-    'Weight', 'Torque', 'Width', 'Height',
-    'Efficiency', 'Power', 'Displacement'
-]
-
 app.layout = html.Div([
     dash_table.DataTable(
-        id='table-editing-simple',
-        columns=(
-            [{'id': 'Model', 'name': 'Model'}] +
-            [{'id': p, 'name': p} for p in params]
-        ),
+        id='editing-prune-data',
+        columns=[{
+            'name': 'Column {}'.format(i),
+            'id': 'column-{}'.format(i)
+        } for i in range(1, 5)],
         data=[
-            dict(Model=i, **{param: 0 for param in params})
-            for i in range(1, 5)
+            {'column-{}'.format(i): (j + (i-1)*5) for i in range(1, 5)}
+            for j in range(5)
         ],
         editable=True
     ),
-    dcc.Graph(id='table-editing-simple-output')
+    html.Div(id='editing-prune-data-output')
 ])
 
 
-@app.callback(
-    Output('table-editing-simple-output', 'figure'),
-    [Input('table-editing-simple', 'data'),
-     Input('table-editing-simple', 'columns')])
-def display_output(rows, columns):
-    df = pd.DataFrame(rows, columns=[c['name'] for c in columns])
-    return {
-        'data': [{
-            'type': 'parcoords',
-            'dimensions': [{
-                'label': col['name'],
-                'values': df[col['id']]
-            } for col in columns]
-        }]
-    }
+@app.callback(Output('editing-prune-data-output', 'children'),
+              [Input('editing-prune-data', 'data')])
+def display_output(rows):
+    pruned_rows = []
+    for row in rows:
+        # require that all elements in a row are specified
+        # the pruning behavior that you need may be different than this
+        if all([cell != '' for cell in row.values()]):
+            pruned_rows.append(row)
 
+    return html.Div([
+        html.Div('Raw Data'),
+        html.Pre(pprint.pformat(rows)),
+        html.Hr(),
+        html.Div('Pruned Data'),
+        html.Pre(pprint.pformat(pruned_rows)),
+    ])
 
 if __name__ == '__main__':
     app.run_server(debug=True)
