@@ -1,49 +1,55 @@
+
 '''
-As discussed in the interactivity chapter, DataTable includes filtering capabilities.
-Users can turn on filtering options by defining the filtering attribute.
-filtering=True will initiate clientside (frontend) filtering.
-Alternatively you can specify filtering='fe'.
-If the DataTable is quite large, clientside filtering will likely become slow.
-Using the backend filtering option: filtering='be' will allow serverside filtering.
-At this time, the filter syntax for frontend and backend filtering differs slightly.
+For large dataframes, you can perform the filtering in Python instead of the default clientside filtering. You can find more information on performing operations in python in the Python Callbacks chapter.
+As mentioned above, the backend filtering syntax currently differs slightly from the frontend syntax.
+BAckend filtering supports equals: eq, greater than: >, and less than: < operations.
 '''
+
 
 import dash
 from dash.dependencies import Input, Output
 import dash_table
-import dash_html_components as html
-
 import pandas as pd
-
-
-df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
 
 
 app = dash.Dash(__name__)
 
-app.layout = html.Div([
-    dash_table.DataTable(
-        id='datatable-filtering-fe',
-        columns=[
-            {"name": i, "id": i, "deletable": True} for i in df.columns
-        ],
-        data=df.to_dict("rows"),
-        filtering=True,
-    ),
-    html.Div(id='datatable-filter-container')
-])
+df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
+
+
+app.layout = dash_table.DataTable(
+    id='table-filtering-be',
+    columns=[
+        {"name": i, "id": i} for i in sorted(df.columns)
+    ],
+
+    filtering='be',
+    filtering_settings=''
+)
 
 
 @app.callback(
-    Output('datatable-filter-container', "children"),
-    [Input('datatable-filtering-fe', "data")])
-def update_graph(rows):
-    if rows is None:
-        dff = df
-    else:
-        dff = pd.DataFrame(rows)
+    Output('table-filtering-be', "data"),
+    [Input('table-filtering-be', "filtering_settings")])
+def update_graph(filtering_settings):
+    print(filtering_settings)
+    filtering_expressions = filtering_settings.split(' && ')
+    dff = df
+    for filter in filtering_expressions:
+        if ' eq ' in filter:
+            col_name = filter.split(' eq ')[0]
+            filter_value = filter.split(' eq ')[1]
+            dff = dff.loc[dff[col_name] == filter_value]
+        if ' > ' in filter:
+            col_name = filter.split(' > ')[0]
+            filter_value = float(filter.split(' > ')[1])
+            dff = dff.loc[dff[col_name] > filter_value]
+        if ' < ' in filter:
+            col_name = filter.split(' < ')[0]
+            filter_value = float(filter.split(' < ')[1])
+            dff = dff.loc[dff[col_name] < filter_value]
 
-    return html.Div()
+    return dff.to_dict('rows')
 
 
 if __name__ == '__main__':
