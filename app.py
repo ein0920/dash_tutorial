@@ -15,23 +15,38 @@ app = dash.Dash(__name__)
 PAGE_SIZE = 5
 
 app.layout = dash_table.DataTable(
-    id='datatable-paging',
+    id='table-paging-and-sorting',
     columns=[
-        {"name": i, "id": i} for i in sorted(df.columns)
+        {'name': i, 'id': i, 'deletable': True} for i in sorted(df.columns)
     ],
     pagination_settings={
         'current_page': 0,
         'page_size': PAGE_SIZE
     },
-    pagination_mode='be'
+    pagination_mode='be',
+
+    sorting='be',
+    sorting_type='single',
+    sorting_settings=[]
 )
 
 
 @app.callback(
-    Output('datatable-paging', 'data'),
-    [Input('datatable-paging', 'pagination_settings')])
-def update_graph(pagination_settings):
-    return df.iloc[
+    Output('table-paging-and-sorting', 'data'),
+    [Input('table-paging-and-sorting', 'pagination_settings'),
+     Input('table-paging-and-sorting', 'sorting_settings')])
+def update_graph(pagination_settings, sorting_settings):
+    if len(sorting_settings):
+        dff = df.sort_values(
+            sorting_settings[0]['column_id'],
+            ascending=sorting_settings[0]['direction'] == 'asc',
+            inplace=False
+        )
+    else:
+        # No sort is applied
+        dff = df
+
+    return dff.iloc[
         pagination_settings['current_page']*pagination_settings['page_size']:
         (pagination_settings['current_page'] + 1)*pagination_settings['page_size']
     ].to_dict('rows')
