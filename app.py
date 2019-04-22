@@ -1,88 +1,39 @@
 import dash
 from dash.dependencies import Input, Output
-import dash_html_components as html
 import dash_table
 import pandas as pd
-from collections import OrderedDict
 
 
 app = dash.Dash(__name__)
 
-df_per_row_dropdown = pd.DataFrame(OrderedDict([
-    ('City', ['NYC', 'Montreal', 'Los Angeles']),
-    ('Neighborhood', ['Brooklyn', 'Mile End', 'Venice']),
-    ('Temperature (F)', [70, 60, 90]),
-]))
+df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/Emissions%20Data.csv').reset_index()
+df['Emission'] = df['Emission'].map(lambda x: '{0:.2f}'.format(x))
 
-
-app.layout = html.Div([
-    dash_table.DataTable(
-        id='dropdown_per_row',
-        data=df_per_row_dropdown.to_dict('rows'),
+app.layout = dash_table.DataTable(
+        id='table-virtualiztion',
+        data=df.to_dict('rows'),
         columns=[
-            {'id': 'City', 'name': 'City'},
-            {'id': 'Neighborhood', 'name': 'Neighborhood', 'presentation': 'dropdown'},
-            {'id': 'Temperature (F)', 'name': 'Temperature (F)'}
+            {'name': i, 'id': i} for i in df.columns
         ],
-
-        editable=True,
-        column_conditional_dropdowns=[
-            {
-                # column id
-                'id': 'Neighborhood',
-                'dropdowns': [
-                    {
-                        # these are filter strings
-                        'condition': 'City eq "NYC"',
-                        'dropdown': [
-                            {'label': i, 'value': i}
-                            for i in [
-                                'Brooklyn',
-                                'Queens',
-                                'Staten Island'
-                            ]
-                        ]
-                    },
-
-                    {
-                        'condition': 'City eq "Montreal"',
-                        'dropdown': [
-                            {'label': i, 'value': i}
-                            for i in [
-                                'Mile End',
-                                'Plateau',
-                                'Hochelaga'
-                            ]
-                        ]
-                    },
-
-                    {
-                        'condition': 'City eq "Los Angeles"',
-                        'dropdown': [
-                            {'label': i, 'value': i}
-                            for i in [
-                                'Venice',
-                                'Hollywood',
-                                'Los Feliz'
-                            ]
-                        ]
-                    }
-
-                ]
-            }
-        ]
-    ),
-    html.Div(id='dropdown_per_row_container')
-])
-
-
-# In order for the changes in the dropdown to persist,
-# the dropdown needs to be "connected" to the table via
-# a callback
-@app.callback(Output('dropdown_per_row_container', 'children'),
-              [Input('dropdown_per_row', 'data_timestamp')])
-def update_output(timestamp):
-    return timestamp
+        n_fixed_rows=1,
+        style_cell={
+            'whiteSpace': 'normal'
+        },
+        style_data_conditional=[
+            {'if': {'column_id': 'index'},
+             'width': '50px'},
+            {'if': {'column_id': 'Year'},
+             'width': '50px'},
+            {'if': {'column_id': 'Country'},
+             'width': '100px'},
+            {'if': {'column_id': 'Continent'},
+             'width': '70px'},
+            {'if': {'column_id': 'Emission'},
+             'width': '75px'},
+        ],
+        virtualization=True,
+        pagination_mode=False
+)
 
 
 if __name__ == '__main__':
