@@ -1,55 +1,94 @@
-
-'''
-For large dataframes, you can perform the filtering in Python instead of the default clientside filtering. You can find more information on performing operations in python in the Python Callbacks chapter.
-As mentioned above, the backend filtering syntax currently differs slightly from the frontend syntax.
-BAckend filtering supports equals: eq, greater than: >, and less than: < operations.
-'''
-
-
 import dash
 from dash.dependencies import Input, Output
-import dash_table
+import dash_core_components as dcc
+import dash_html_components as html
+import datetime
+from flask_caching import Cache
+import os
 import pandas as pd
+import time
+import uuid
+
+external_stylesheets = [
+    # Dash CSS
+    'https://codepen.io/chriddyp/pen/bWLwgP.css',
+    # Loading screen CSS
+    'https://codepen.io/chriddyp/pen/brPBPO.css']
+
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+cache = Cache(app.server, config={
+    # 'CACHE_TYPE': 'redis',
+    # Note that filesystem cache doesn't work on systems with ephemeral
+    # filesystems like Heroku.
+    'CACHE_TYPE': 'filesystem',
+    'CACHE_DIR': 'cache-directory',
+
+    # should be equal to maximum number of users on the app at a single time
+    # higher numbers will store more data in the filesystem / redis cache
+    'CACHE_THRESHOLD': 200
+})
 
 
-app = dash.Dash(__name__)
+def get_dataframe(session_id):
+    @cache.memoize()
+    def query_and_serialize_data(session_id):
+        # expensive or user/session-unique data processing step goes here
 
-df = pd.read_csv('https://raw.githubusercontent.com/plotly/datasets/master/gapminder2007.csv')
+        # simulate a user/session-unique data processing step by generating
+        # data that is dependent on time
+        now = datetime.datetime.now()
+
+        # simulate an expensive data processing task by sleeping
+        time.sleep(5)
+
+        df = pd.DataFrame({
+            'time': [
+                str(now - datetime.timedelta(seconds=15)),
+                str(now - datetime.timedelta(seconds=10)),
+                str(now - datetime.timedelta(seconds=5)),
+                str(now)
+            ],
+            'values': ['a', 'b', 'a', 'c']
+        })
+        return df.to_json()
+
+    return pd.read_json(query_and_serialize_data(session_id))
 
 
-app.layout = dash_table.DataTable(
-    id='table-filtering-be',
-    columns=[
-        {"name": i, "id": i} for i in sorted(df.columns)
-    ],
+def serve_layout():
+    session_id = str(uuid.uuid4())
 
-    filtering='be',
-    filtering_settings=''
-)
+    return html.Div([
+        html.Div(session_id, id='session-id', style={'display': 'none'}),
+        html.Button('Get data', id='button'),
+        html.Div(id='output-1'),
+        html.Div(id='output-2')
+    ])
 
 
-@app.callback(
-    Output('table-filtering-be', "data"),
-    [Input('table-filtering-be', "filtering_settings")])
-def update_graph(filtering_settings):
-    print(filtering_settings)
-    filtering_expressions = filtering_settings.split(' && ')
-    dff = df
-    for filter in filtering_expressions:
-        if ' eq ' in filter:
-            col_name = filter.split(' eq ')[0]
-            filter_value = filter.split(' eq ')[1]
-            dff = dff.loc[dff[col_name] == filter_value]
-        if ' > ' in filter:
-            col_name = filter.split(' > ')[0]
-            filter_value = float(filter.split(' > ')[1])
-            dff = dff.loc[dff[col_name] > filter_value]
-        if ' < ' in filter:
-            col_name = filter.split(' < ')[0]
-            filter_value = float(filter.split(' < ')[1])
-            dff = dff.loc[dff[col_name] < filter_value]
+app.layout = serve_layout
 
-    return dff.to_dict('rows')
+
+@app.callback(Output('output-1', 'children'),
+              [Input('button', 'n_clicks'),
+               Input('session-id', 'children')])
+def display_value_1(value, session_id):
+    df = get_dataframe(session_id)
+    return html.Div([
+        'Output 1 - Button has been clicked {} times'.format(value),
+        html.Pre(df.to_csv())
+    ])
+
+
+@app.callback(Output('output-2', 'children'),
+              [Input('button', 'n_clicks'),
+               Input('session-id', 'children')])
+def display_value_2(value, session_id):
+    df = get_dataframe(session_id)
+    return html.Div([
+        'Output 2 - Button has been clicked {} times'.format(value),
+        html.Pre(df.to_csv())
+    ])
 
 
 if __name__ == '__main__':
