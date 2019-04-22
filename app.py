@@ -3,36 +3,82 @@ from dash.dependencies import Input, Output
 import dash_html_components as html
 import dash_table
 from dash_table.Format import Format, Scheme, Sign, Symbol
-import dash_table.FormatTemplate as FormatTemplate
 import pandas as pd
 from collections import OrderedDict
 
 app = dash.Dash(__name__)
 
 df_typing_formatting = pd.DataFrame(OrderedDict([
-    ('city', ['Vancouver', 'Toronto', 'Calgary', 'Ottawa', 'Montreal', 'Halifax', 'Regina', 'Fredericton']),
-    ('average_04_2018', [1092000, 766000, 431000, 382000, 341000, 316000, 276000, 173000]),
-    ('change_04_2017_04_2018', [0.143, -0.051, 0.001, 0.083, 0.063, 0.024, -0.065, 0.012]),
+    ('city', ['NYC', 'Montreal', 'Los Angeles']),
+    ('max', [108, 99, 111]),
+    ('max_date', ['1926-07-22', '1975-08-01', '1939-09-20']),
+    ('min', [-15, -36, 28]),
+    ('min_date', ['1934-02-09', '1957-01-15', '1913-01-07'])
 ]))
 
 app.layout = html.Div([
     dash_table.DataTable(
-        id='typing_formatting_1',
+        id='typing_formatting',
         data=df_typing_formatting.to_dict('rows'),
         columns=[{
             'id': 'city',
             'name': 'City',
             'type': 'text'
         }, {
-            'id': 'average_04_2018',
-            'name': 'Average Price ($)',
+            'id': 'max',
+            'name': u'Max Temperature (˚F)',
             'type': 'numeric',
-            'format': FormatTemplate.money(0)
+            'format': Format(
+                precision=0,
+                scheme=Scheme.fixed,
+                symbol=Symbol.yes,
+                symbol_suffix=u'˚F'
+            ),
+            # equivalent manual configuration
+            # 'format': {
+            #     'locale': {
+            #         'symbol': ['', '˚F']
+            #     },
+            #     'specifier': '$.0f'
+            # }
         }, {
-            'id': 'change_04_2017_04_2018',
-            'name': 'Variation (%)',
+            'id': 'max_date',
+            'name': 'Max Temperature (Date)',
+            'type': 'datetime'
+        }, {
+            'id': 'min',
+            'name': u'Min Temperature (˚F)',
             'type': 'numeric',
-            'format': FormatTemplate.percentage(1).sign(Sign.positive)
+            'format': Format(
+                nully='N/A',
+                precision=0,
+                scheme=Scheme.fixed,
+                sign=Sign.parantheses,
+                symbol=Symbol.yes,
+                symbol_suffix=u'˚F'
+            ),
+            # equivalent manual configuration
+            # 'format': {
+            #     'locale': {
+            #         'symbol': ['', '˚F']
+            #     },
+            #     'nully': 'N/A'
+            #     'specifier': '($.0f'
+            # }
+            'on_change': {
+                'action': 'coerce',
+                'failure': 'default'
+            },
+            'validation': {
+                'default': None
+            }
+        }, {
+            'id': 'min_date',
+            'name': 'Min Temperature (Date)',
+            'type': 'datetime',
+            'on_change': {
+                'action': 'none'
+            }
         }],
         editable=True
     )
